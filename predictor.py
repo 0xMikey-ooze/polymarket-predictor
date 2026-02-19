@@ -237,35 +237,48 @@ class BTCPredictor:
         self.features = None
         self.train_count = 0
         self.predictions_since_train = 0
+        # Adaptive learning state
+        self.recent_results = []  # last N (prediction_correct: bool) for regime detection
+        self.consecutive_wrong = 0
+        self.regime = "normal"  # normal, hot, cold
 
     def load_data(self):
-        self.candles = fetch_all_candles(10000)
+        self.candles = fetch_all_candles(2000)
         if len(self.candles) < 100:
             raise RuntimeError(f"Only got {len(self.candles)} candles, need at least 100")
+
+    def _compute_sample_weights(self, n_samples):
+        """Exponential recency weighting — recent candles matter 3x more than old ones."""
+        weights = np.exp(np.linspace(-1.0, 0.0, n_samples))  # oldest=0.37, newest=1.0
+        # During cold streaks, weight recent data even more aggressively
+        if self.regime == "cold":
+            weights = np.exp(np.linspace(-2.0, 0.0, n_samples))  # oldest=0.14, newest=1.0
+            print("  ⚡ COLD REGIME: aggressive recency weighting")
+        return weights
 
     def train(self):
         print("Training XGBoost model...")
         features = compute_features(self.candles)
         n = len(self.candles)
-        # Target: next candle up
         target = np.zeros(n)
         for i in range(n - 1):
             target[i] = 1 if self.candles[i+1][2] > self.candles[i][2] else 0
 
-        # Use rows 50..n-2 (need lookback and next candle for target)
-        # Replace any remaining NaN with 0
         features_clean = np.nan_to_num(features, nan=0.0)
         valid = np.ones(n, dtype=bool)
-        valid[-1] = False  # no target for last
-        valid[:50] = False  # need lookback
+        valid[-1] = False
+        valid[:50] = False
 
         X = features_clean[valid]
         y = target[valid]
-        print(f"  Training samples: {len(X)}, up ratio: {y.mean():.3f}")
+        
+        # Adaptive sample weights — recent data matters more
+        weights = self._compute_sample_weights(len(X))
+        
+        print(f"  Training samples: {len(X)}, up ratio: {y.mean():.3f}, regime: {self.regime}")
 
         self.scaler.fit(X)
         X_scaled = self.scaler.transform(X)
-        # Replace any inf/nan from scaling
         X_scaled = np.nan_to_num(X_scaled, nan=0.0, posinf=0.0, neginf=0.0)
 
         self.model = XGBClassifier(
@@ -273,34 +286,78 @@ class BTCPredictor:
             subsample=0.8, colsample_bytree=0.8,
             eval_metric="logloss", verbosity=0, use_label_encoder=False
         )
-        self.model.fit(X_scaled, y)
+        self.model.fit(X_scaled, y, sample_weight=weights)
         self.features = features
         self.train_count += 1
         self.predictions_since_train = 0
         print(f"  Model trained (#{self.train_count})")
 
+    def record_result(self, correct: bool):
+        """Track prediction results for regime detection."""
+        self.recent_results.append(correct)
+        if len(self.recent_results) > 20:
+            self.recent_results = self.recent_results[-20:]
+        
+        if correct:
+            self.consecutive_wrong = 0
+        else:
+            self.consecutive_wrong += 1
+        
+        # Regime detection
+        if len(self.recent_results) >= 10:
+            recent_wr = sum(self.recent_results[-10:]) / 10
+            if recent_wr < 0.35:
+                self.regime = "cold"
+            elif recent_wr > 0.65:
+                self.regime = "hot"
+            else:
+                self.regime = "normal"
+        
+        # Emergency retrain: 5 wrong in a row = regime changed, retrain NOW
+        if self.consecutive_wrong >= 5:
+            print("  🚨 5 consecutive wrong — emergency retrain!")
+            self.train()
+    
+    def should_retrain(self):
+        """Adaptive retrain schedule: faster when cold, slower when hot."""
+        if self.regime == "cold":
+            return self.predictions_since_train >= 20  # retrain every ~1.5 hours when cold
+        elif self.regime == "hot":
+            return self.predictions_since_train >= 200  # don't fix what's working
+        else:
+            return self.predictions_since_train >= 50  # normal: ~4 hours
+
     def predict_current(self):
-        """Predict direction for next candle. Returns (prediction, probability)."""
+        """Predict direction for next candle. Returns probability of UP."""
         features = compute_features(self.candles)
         current = features[-1:]
         if np.any(np.isnan(current)):
-            # Fill NaN with 0
             current = np.nan_to_num(current, 0)
         X = self.scaler.transform(current)
-        prob = self.model.predict_proba(X)[0][1]  # prob of UP
+        prob = self.model.predict_proba(X)[0][1]
         return prob
 
     def add_candle(self, candle):
         self.candles.append(candle)
-        # Keep last 10500
-        if len(self.candles) > 10500:
-            self.candles = self.candles[-10000:]
+        if len(self.candles) > 2500:
+            self.candles = self.candles[-2000:]
 
 # ── Main loop ────────────────────────────────────────────────────────────────
 
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        import numpy as np
+        if isinstance(obj, (np.floating, np.float32, np.float64)):
+            return float(obj)
+        if isinstance(obj, (np.integer,)):
+            return int(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super().default(obj)
+
 def save_results(results):
     with open(RESULTS_PATH, "w") as f:
-        json.dump(results, f, indent=2)
+        json.dump(results, f, indent=2, cls=NumpyEncoder)
 
 def main():
     print("=" * 60)
@@ -395,10 +452,14 @@ def main():
 
                 save_results(results)
 
+                # Adaptive learning: record result and detect regime
+                predictor.record_result(correct)
+                
                 print(f"  ✓ RESULT: {result_str} | Pred: {pred} | Actual: {actual} | "
                       f"BTC: {price_start:.0f}→{price_end:.0f} | Conf: {conf:.3f}")
                 print(f"  📊 Record: {results['correct']}W-{results['wrong']}L "
-                      f"({results['win_rate']:.1%}) | PnL: ${results['pnl_if_real']}")
+                      f"({results['win_rate']:.1%}) | PnL: ${results['pnl_if_real']} | "
+                      f"Regime: {predictor.regime}")
                 pending_prediction = None
 
             # Add new candles to predictor
@@ -406,9 +467,9 @@ def main():
                 predictor.add_candle(c)
             last_candle_time = predictor.candles[-1][0]
 
-            # Retrain every 100 predictions
+            # Adaptive retrain schedule
             predictor.predictions_since_train += 1
-            if predictor.predictions_since_train >= 100:
+            if predictor.should_retrain():
                 predictor.train()
 
             # Make prediction for next candle

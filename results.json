@@ -1,314 +1,488 @@
 {
-  "started": "2026-02-19T13:17:15.682352",
-  "total_predictions": 30,
-  "correct": 14,
-  "wrong": 16,
-  "skipped": 20,
-  "win_rate": 46.7,
-  "confident_predictions": 15,
-  "confident_correct": 8,
-  "confident_win_rate": 53.3,
-  "pnl_if_real": -2,
+  "started": "2026-02-19T13:00:00+00:00",
+  "total_predictions": 52,
+  "correct": 26,
+  "wrong": 26,
+  "win_rate": 50.0,
+  "pnl": 0,
+  "stats": {
+    "BTC": {
+      "total": 31,
+      "wins": 14
+    },
+    "ETH": {
+      "total": 21,
+      "wins": 12
+    }
+  },
   "trades": [
     {
-      "time": "2026-02-19T13:17:15.682352",
-      "market_slug": "btc-updown-5m-2026-02-19-131500",
+      "time": "2026-02-19 13:15:00",
+      "symbol": "BTC-USDT",
       "prediction": "UP",
-      "confidence": 0.6154000163078308,
-      "actual": "DOWN",
+      "confidence": 0.6154,
       "result": "LOSS",
-      "btc_price_start": 66324.4,
-      "btc_price_end": 66204.6
+      "entry_price": 66324.4,
+      "exit_price": 66204.6
     },
     {
-      "time": "2026-02-19T13:20:15.000178",
-      "market_slug": "btc-updown-5m-2026-02-19-132000",
-      "prediction": "UP",
-      "confidence": 0.5626999735832214,
-      "actual": "DOWN",
-      "result": "LOSS",
-      "btc_price_start": 66204.6,
-      "btc_price_end": 66193.5
-    },
-    {
-      "time": "2026-02-19T13:25:15.000169",
-      "market_slug": "btc-updown-5m-2026-02-19-132500",
-      "prediction": "UP",
-      "confidence": 0.5583000183105469,
-      "actual": "DOWN",
-      "result": "LOSS",
-      "btc_price_start": 66193.5,
-      "btc_price_end": 66179.8
-    },
-    {
-      "time": "2026-02-19T13:35:15.000177",
-      "market_slug": "btc-updown-5m-2026-02-19-133500",
+      "time": "2026-02-19 13:15:00",
+      "symbol": "ETH-USDT",
       "prediction": "DOWN",
-      "confidence": 0.6132000088691711,
-      "actual": "DOWN",
+      "confidence": 0.6197,
       "result": "WIN",
-      "btc_price_start": 66264.1,
-      "btc_price_end": 66071.7
+      "entry_price": 1936.31,
+      "exit_price": 1933.58
     },
     {
-      "time": "2026-02-19T13:40:15.000177",
-      "market_slug": "btc-updown-5m-2026-02-19-134000",
+      "time": "2026-02-19 13:20:00",
+      "symbol": "BTC-USDT",
       "prediction": "UP",
-      "confidence": 0.6672999858856201,
-      "actual": "DOWN",
+      "confidence": 0.5627,
       "result": "LOSS",
-      "btc_price_start": 66071.7,
-      "btc_price_end": 65965.4
+      "entry_price": 66204.6,
+      "exit_price": 66193.5
     },
     {
-      "time": "2026-02-19T13:55:15.000172",
-      "market_slug": "btc-updown-5m-2026-02-19-135500",
+      "time": "2026-02-19 13:25:00",
+      "symbol": "BTC-USDT",
       "prediction": "UP",
-      "confidence": 0.5615000128746033,
-      "actual": "DOWN",
+      "confidence": 0.5583,
       "result": "LOSS",
-      "btc_price_start": 65960.3,
-      "btc_price_end": 65949.0
+      "entry_price": 66193.5,
+      "exit_price": 66179.8
     },
     {
-      "time": "2026-02-19T14:00:15.000159",
-      "market_slug": "btc-updown-5m-2026-02-19-140000",
+      "time": "2026-02-19 13:35:00",
+      "symbol": "BTC-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.6132,
+      "result": "WIN",
+      "entry_price": 66264.1,
+      "exit_price": 66071.7
+    },
+    {
+      "time": "2026-02-19 13:35:00",
+      "symbol": "ETH-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.639,
+      "result": "WIN",
+      "entry_price": 1935.62,
+      "exit_price": 1920.63
+    },
+    {
+      "time": "2026-02-19 13:40:00",
+      "symbol": "BTC-USDT",
       "prediction": "UP",
-      "confidence": 0.6518999934196472,
-      "actual": "DOWN",
+      "confidence": 0.6673,
       "result": "LOSS",
-      "btc_price_start": 65949.0,
-      "btc_price_end": 65883.2
+      "entry_price": 66071.7,
+      "exit_price": 65965.4
     },
     {
-      "time": "2026-02-19T14:05:15.000858",
-      "market_slug": "btc-updown-5m-2026-02-19-140500",
+      "time": "2026-02-19 13:40:00",
+      "symbol": "ETH-USDT",
       "prediction": "UP",
-      "confidence": 0.6150000095367432,
-      "actual": "UP",
-      "result": "WIN",
-      "btc_price_start": 65883.2,
-      "btc_price_end": 65938.0
+      "confidence": 0.702,
+      "result": "LOSS",
+      "entry_price": 1920.63,
+      "exit_price": 1916.7
     },
     {
-      "time": "2026-02-19T14:20:15.000163",
-      "market_slug": "btc-updown-5m-2026-02-19-142000",
+      "time": "2026-02-19 13:50:00",
+      "symbol": "ETH-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.5788,
+      "result": "LOSS",
+      "entry_price": 1917.63,
+      "exit_price": 1923.19
+    },
+    {
+      "time": "2026-02-19 13:55:00",
+      "symbol": "BTC-USDT",
       "prediction": "UP",
-      "confidence": 0.6826000213623047,
-      "actual": "UP",
-      "result": "WIN",
-      "btc_price_start": 65972.4,
-      "btc_price_end": 66016.5
+      "confidence": 0.5615,
+      "result": "LOSS",
+      "entry_price": 65960.3,
+      "exit_price": 65949.0
     },
     {
-      "time": "2026-02-19T14:25:15.000166",
-      "market_slug": "btc-updown-5m-2026-02-19-142500",
+      "time": "2026-02-19 13:55:00",
+      "symbol": "ETH-USDT",
       "prediction": "DOWN",
-      "confidence": 0.5922999978065491,
-      "actual": "DOWN",
+      "confidence": 0.5595,
       "result": "WIN",
-      "btc_price_start": 66016.5,
-      "btc_price_end": 65980.1
+      "entry_price": 1923.19,
+      "exit_price": 1922.51
     },
     {
-      "time": "2026-02-19T14:45:15.000176",
-      "market_slug": "btc-updown-5m-2026-02-19-144500",
+      "time": "2026-02-19 14:00:00",
+      "symbol": "BTC-USDT",
       "prediction": "UP",
-      "confidence": 0.5677000284194946,
-      "actual": "UP",
-      "result": "WIN",
-      "btc_price_start": 66205.0,
-      "btc_price_end": 66281.8
+      "confidence": 0.6519,
+      "result": "LOSS",
+      "entry_price": 65949.0,
+      "exit_price": 65883.2
     },
     {
-      "time": "2026-02-19T14:55:15.000150",
-      "market_slug": "btc-updown-5m-2026-02-19-145500",
-      "prediction": "DOWN",
-      "confidence": 0.6205999851226807,
-      "actual": "DOWN",
-      "result": "WIN",
-      "btc_price_start": 66522.3,
-      "btc_price_end": 66422.0
-    },
-    {
-      "time": "2026-02-19T15:00:15.000107",
-      "market_slug": "btc-updown-5m-2026-02-19-150000",
+      "time": "2026-02-19 14:00:00",
+      "symbol": "ETH-USDT",
       "prediction": "UP",
-      "confidence": 0.5644000172615051,
-      "actual": "UP",
+      "confidence": 0.5853,
       "result": "WIN",
-      "btc_price_start": 66422.0,
-      "btc_price_end": 66630.0
+      "entry_price": 1922.51,
+      "exit_price": 1922.71
     },
     {
-      "time": "2026-02-19T15:10:15.000158",
-      "market_slug": "btc-updown-5m-2026-02-19-151000",
+      "time": "2026-02-19 14:05:00",
+      "symbol": "BTC-USDT",
       "prediction": "UP",
-      "confidence": 0.5817000269889832,
-      "actual": "DOWN",
-      "result": "LOSS",
-      "btc_price_start": 66405.1,
-      "btc_price_end": 66164.5
-    },
-    {
-      "time": "2026-02-19T15:15:15.000156",
-      "market_slug": "btc-updown-5m-2026-02-19-151500",
-      "prediction": "DOWN",
-      "confidence": 0.5830000042915344,
-      "actual": "UP",
-      "result": "LOSS",
-      "btc_price_start": 66164.5,
-      "btc_price_end": 66198.2
-    },
-    {
-      "time": "2026-02-19T15:20:15.000163",
-      "market_slug": "btc-updown-5m-2026-02-19-152000",
-      "prediction": "DOWN",
-      "confidence": 0.6499999761581421,
-      "actual": "DOWN",
+      "confidence": 0.615,
       "result": "WIN",
-      "btc_price_start": 66198.2,
-      "btc_price_end": 66177.8
+      "entry_price": 65883.2,
+      "exit_price": 65938.0
     },
     {
-      "time": "2026-02-19T15:35:15.000159",
-      "market_slug": "btc-updown-5m-2026-02-19-153500",
+      "time": "2026-02-19 14:05:00",
+      "symbol": "ETH-USDT",
       "prediction": "DOWN",
-      "confidence": 0.6116999983787537,
-      "actual": "UP",
+      "confidence": 0.6233,
       "result": "LOSS",
-      "btc_price_start": 66399.7,
-      "btc_price_end": 66421.6
+      "entry_price": 1922.71,
+      "exit_price": 1927.0
     },
     {
-      "time": "2026-02-19T15:40:15.000164",
-      "market_slug": "btc-updown-5m-2026-02-19-154000",
+      "time": "2026-02-19 14:10:00",
+      "symbol": "ETH-USDT",
       "prediction": "DOWN",
-      "confidence": 0.692300021648407,
-      "actual": "UP",
+      "confidence": 0.626,
       "result": "LOSS",
-      "btc_price_start": 66421.6,
-      "btc_price_end": 66481.7
+      "entry_price": 1927.0,
+      "exit_price": 1929.88
     },
     {
-      "time": "2026-02-19T15:45:15.000128",
-      "market_slug": "btc-updown-5m-2026-02-19-154500",
+      "time": "2026-02-19 14:15:00",
+      "symbol": "ETH-USDT",
       "prediction": "DOWN",
-      "confidence": 0.6263999938964844,
-      "actual": "DOWN",
+      "confidence": 0.6046,
       "result": "WIN",
-      "btc_price_start": 66481.7,
-      "btc_price_end": 66305.2
+      "entry_price": 1929.88,
+      "exit_price": 1928.0
     },
     {
-      "time": "2026-02-19T15:50:15.000191",
-      "market_slug": "btc-updown-5m-2026-02-19-155000",
+      "time": "2026-02-19 14:20:00",
+      "symbol": "BTC-USDT",
       "prediction": "UP",
-      "confidence": 0.5511999726295471,
-      "actual": "UP",
+      "confidence": 0.6826,
       "result": "WIN",
-      "btc_price_start": 66305.2,
-      "btc_price_end": 66327.4
+      "entry_price": 65972.4,
+      "exit_price": 66016.5
     },
     {
-      "time": "2026-02-19T15:55:15.000757",
-      "market_slug": "btc-updown-5m-2026-02-19-155500",
+      "time": "2026-02-19 14:25:00",
+      "symbol": "BTC-USDT",
       "prediction": "DOWN",
-      "confidence": 0.6862000226974487,
-      "actual": "UP",
-      "result": "LOSS",
-      "btc_price_start": 66327.4,
-      "btc_price_end": 66358.7
-    },
-    {
-      "time": "2026-02-19T16:00:15.000174",
-      "market_slug": "btc-updown-5m-2026-02-19-160000",
-      "prediction": "DOWN",
-      "confidence": 0.5756000280380249,
-      "actual": "DOWN",
+      "confidence": 0.5923,
       "result": "WIN",
-      "btc_price_start": 66358.7,
-      "btc_price_end": 66152.2
+      "entry_price": 66016.5,
+      "exit_price": 65980.1
     },
     {
-      "time": "2026-02-19T16:10:15.000163",
-      "market_slug": "btc-updown-5m-2026-02-19-161000",
+      "time": "2026-02-19 14:25:00",
+      "symbol": "ETH-USDT",
       "prediction": "DOWN",
-      "confidence": 0.6359999775886536,
-      "actual": "UP",
-      "result": "LOSS",
-      "btc_price_start": 66155.2,
-      "btc_price_end": 66158.6
-    },
-    {
-      "time": "2026-02-19T16:15:15.000154",
-      "market_slug": "btc-updown-5m-2026-02-19-161500",
-      "prediction": "DOWN",
-      "confidence": 0.5630999803543091,
-      "actual": "UP",
-      "result": "LOSS",
-      "btc_price_start": 66158.6,
-      "btc_price_end": 66343.3
-    },
-    {
-      "time": "2026-02-19T16:20:15.000175",
-      "market_slug": "btc-updown-5m-2026-02-19-162000",
-      "prediction": "DOWN",
-      "confidence": 0.7263000011444092,
-      "actual": "DOWN",
+      "confidence": 0.6005,
       "result": "WIN",
-      "btc_price_start": 66343.3,
-      "btc_price_end": 66254.3
+      "entry_price": 1927.56,
+      "exit_price": 1926.41
     },
     {
-      "time": "2026-02-19T16:35:15.000186",
-      "market_slug": "btc-updown-5m-2026-02-19-163500",
+      "time": "2026-02-19 14:35:00",
+      "symbol": "ETH-USDT",
       "prediction": "DOWN",
-      "confidence": 0.59170001745224,
-      "actual": "UP",
+      "confidence": 0.6787,
       "result": "LOSS",
-      "btc_price_start": 66474.9,
-      "btc_price_end": 66490.4
+      "entry_price": 1916.83,
+      "exit_price": 1929.4
     },
     {
-      "time": "2026-02-19T16:40:15.000144",
-      "market_slug": "btc-updown-5m-2026-02-19-164000",
+      "time": "2026-02-19 14:40:00",
+      "symbol": "ETH-USDT",
       "prediction": "UP",
-      "confidence": 0.567799985408783,
-      "actual": "DOWN",
-      "result": "LOSS",
-      "btc_price_start": 66490.4,
-      "btc_price_end": 66433.9
-    },
-    {
-      "time": "2026-02-19T16:45:15.000169",
-      "market_slug": "btc-updown-5m-2026-02-19-164500",
-      "prediction": "UP",
-      "confidence": 0.5552999973297119,
-      "actual": "DOWN",
-      "result": "LOSS",
-      "btc_price_start": 66433.9,
-      "btc_price_end": 66312.8
-    },
-    {
-      "time": "2026-02-19T16:50:15.000140",
-      "market_slug": "btc-updown-5m-2026-02-19-165000",
-      "prediction": "UP",
-      "confidence": 0.621999979019165,
-      "actual": "UP",
+      "confidence": 0.5616,
       "result": "WIN",
-      "btc_price_start": 66312.8,
-      "btc_price_end": 66433.1
+      "entry_price": 1929.4,
+      "exit_price": 1932.9
     },
     {
-      "time": "2026-02-19T16:55:15.000169",
-      "market_slug": "btc-updown-5m-2026-02-19-165500",
+      "time": "2026-02-19 14:45:00",
+      "symbol": "BTC-USDT",
+      "prediction": "UP",
+      "confidence": 0.5677,
+      "result": "WIN",
+      "entry_price": 66205.0,
+      "exit_price": 66281.8
+    },
+    {
+      "time": "2026-02-19 14:55:00",
+      "symbol": "BTC-USDT",
       "prediction": "DOWN",
-      "confidence": 0.5511000156402588,
-      "actual": "DOWN",
+      "confidence": 0.6206,
       "result": "WIN",
-      "btc_price_start": 66433.1,
-      "btc_price_end": 66352.7
+      "entry_price": 66522.3,
+      "exit_price": 66422.0
+    },
+    {
+      "time": "2026-02-19 14:55:00",
+      "symbol": "ETH-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.6817,
+      "result": "WIN",
+      "entry_price": 1942.09,
+      "exit_price": 1936.31
+    },
+    {
+      "time": "2026-02-19 15:00:00",
+      "symbol": "BTC-USDT",
+      "prediction": "UP",
+      "confidence": 0.5644,
+      "result": "WIN",
+      "entry_price": 66422.0,
+      "exit_price": 66630.0
+    },
+    {
+      "time": "2026-02-19 15:00:00",
+      "symbol": "ETH-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.5614,
+      "result": "LOSS",
+      "entry_price": 1936.31,
+      "exit_price": 1943.37
+    },
+    {
+      "time": "2026-02-19 15:05:00",
+      "symbol": "ETH-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.5734,
+      "result": "WIN",
+      "entry_price": 1943.37,
+      "exit_price": 1932.8
+    },
+    {
+      "time": "2026-02-19 15:10:00",
+      "symbol": "BTC-USDT",
+      "prediction": "UP",
+      "confidence": 0.5817,
+      "result": "LOSS",
+      "entry_price": 66405.1,
+      "exit_price": 66164.5
+    },
+    {
+      "time": "2026-02-19 15:15:00",
+      "symbol": "BTC-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.583,
+      "result": "LOSS",
+      "entry_price": 66164.5,
+      "exit_price": 66198.2
+    },
+    {
+      "time": "2026-02-19 15:20:00",
+      "symbol": "BTC-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.65,
+      "result": "WIN",
+      "entry_price": 66198.2,
+      "exit_price": 66177.8
+    },
+    {
+      "time": "2026-02-19 15:20:00",
+      "symbol": "ETH-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.6793,
+      "result": "WIN",
+      "entry_price": 1923.83,
+      "exit_price": 1923.0
+    },
+    {
+      "time": "2026-02-19 15:35:00",
+      "symbol": "BTC-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.6117,
+      "result": "LOSS",
+      "entry_price": 66399.7,
+      "exit_price": 66421.6
+    },
+    {
+      "time": "2026-02-19 15:40:00",
+      "symbol": "BTC-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.6923,
+      "result": "LOSS",
+      "entry_price": 66421.6,
+      "exit_price": 66481.7
+    },
+    {
+      "time": "2026-02-19 15:45:00",
+      "symbol": "BTC-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.6264,
+      "result": "WIN",
+      "entry_price": 66481.7,
+      "exit_price": 66305.2
+    },
+    {
+      "time": "2026-02-19 15:45:00",
+      "symbol": "ETH-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.5564,
+      "result": "WIN",
+      "entry_price": 1931.64,
+      "exit_price": 1921.86
+    },
+    {
+      "time": "2026-02-19 15:50:00",
+      "symbol": "BTC-USDT",
+      "prediction": "UP",
+      "confidence": 0.5512,
+      "result": "WIN",
+      "entry_price": 66305.2,
+      "exit_price": 66327.4
+    },
+    {
+      "time": "2026-02-19 15:55:00",
+      "symbol": "BTC-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.6862,
+      "result": "LOSS",
+      "entry_price": 66327.4,
+      "exit_price": 66358.7
+    },
+    {
+      "time": "2026-02-19 16:00:00",
+      "symbol": "BTC-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.5756,
+      "result": "WIN",
+      "entry_price": 66358.7,
+      "exit_price": 66152.2
+    },
+    {
+      "time": "2026-02-19 16:00:00",
+      "symbol": "ETH-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.5516,
+      "result": "WIN",
+      "entry_price": 1925.51,
+      "exit_price": 1919.18
+    },
+    {
+      "time": "2026-02-19 16:10:00",
+      "symbol": "BTC-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.636,
+      "result": "LOSS",
+      "entry_price": 66155.2,
+      "exit_price": 66158.6
+    },
+    {
+      "time": "2026-02-19 16:15:00",
+      "symbol": "BTC-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.5631,
+      "result": "LOSS",
+      "entry_price": 66158.6,
+      "exit_price": 66343.3
+    },
+    {
+      "time": "2026-02-19 16:20:00",
+      "symbol": "BTC-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.7263,
+      "result": "WIN",
+      "entry_price": 66343.3,
+      "exit_price": 66254.3
+    },
+    {
+      "time": "2026-02-19 16:25:00",
+      "symbol": "ETH-USDT",
+      "prediction": "UP",
+      "confidence": 0.7016,
+      "result": "LOSS",
+      "entry_price": 1922.98,
+      "exit_price": 1920.54
+    },
+    {
+      "time": "2026-02-19 16:35:00",
+      "symbol": "BTC-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.5917,
+      "result": "LOSS",
+      "entry_price": 66474.9,
+      "exit_price": 66490.4
+    },
+    {
+      "time": "2026-02-19 16:35:00",
+      "symbol": "ETH-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.6287,
+      "result": "LOSS",
+      "entry_price": 1928.08,
+      "exit_price": 1928.58
+    },
+    {
+      "time": "2026-02-19 16:40:00",
+      "symbol": "BTC-USDT",
+      "prediction": "UP",
+      "confidence": 0.5678,
+      "result": "LOSS",
+      "entry_price": 66490.4,
+      "exit_price": 66433.9
+    },
+    {
+      "time": "2026-02-19 16:45:00",
+      "symbol": "BTC-USDT",
+      "prediction": "UP",
+      "confidence": 0.5553,
+      "result": "LOSS",
+      "entry_price": 66433.9,
+      "exit_price": 66312.8
+    },
+    {
+      "time": "2026-02-19 16:50:00",
+      "symbol": "BTC-USDT",
+      "prediction": "UP",
+      "confidence": 0.622,
+      "result": "WIN",
+      "entry_price": 66312.8,
+      "exit_price": 66433.1
+    },
+    {
+      "time": "2026-02-19 16:55:00",
+      "symbol": "BTC-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.5511,
+      "result": "WIN",
+      "entry_price": 66433.1,
+      "exit_price": 66352.7
+    },
+    {
+      "time": "2026-02-19 17:10:00",
+      "symbol": "ETH-USDT",
+      "prediction": "DOWN",
+      "confidence": 0.6492,
+      "result": "LOSS",
+      "entry_price": 1921.52,
+      "exit_price": 1929.73
+    },
+    {
+      "time": "2026-02-19 17:25:00",
+      "symbol": "BTC-USDT",
+      "prediction": "UP",
+      "confidence": 0.6929,
+      "result": "LOSS",
+      "entry_price": 66775.5,
+      "exit_price": 66640.5
     }
   ]
 }
