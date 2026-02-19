@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polymarket BTC Predictor — Live Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0e17;--card:#111827;--border:#1e2a3a;--text:#e2e8f0;--dim:#64748b;--green:#10b981;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,monospace;background:var(--bg);color:var(--text);min-height:100vh;padding:16px}
+a{color:var(--blue)}
+.header{text-align:center;padding:20px 0 10px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.header h1{font-size:1.4rem;letter-spacing:1px;color:var(--text)}
+.header .sub{color:var(--dim);font-size:.85rem;margin-top:6px}
+.live-dot{display:inline-block;width:8px;height:8px;background:var(--green);border-radius:50%;margin-right:6px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.card .label{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:6px}
+.card .value{font-size:2rem;font-weight:700}
+.card .extra{font-size:.75rem;color:var(--dim);margin-top:4px}
+.green{color:var(--green)}.red{color:var(--red)}.yellow{color:var(--yellow)}.dim{color:var(--dim)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:20px}
+.section h2{font-size:.9rem;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:12px}
+canvas{width:100%;height:auto}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);color:var(--dim);font-size:.7rem;text-transform:uppercase;letter-spacing:.5px}
+td{padding:7px 6px;border-bottom:1px solid #1a2332}
+tr:hover{background:#1a2332}
+.badge{padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600}
+.badge-win{background:#10b98122;color:var(--green)}.badge-loss{background:#ef444422;color:var(--red)}
+.badge-up{background:#3b82f622;color:var(--blue)}.badge-down{background:#f59e0b22;color:var(--yellow)}
+.badge-skip{background:#64748b22;color:var(--dim)}
+.footer{text-align:center;padding:12px;color:var(--dim);font-size:.75rem}
+.hist-row{display:flex;align-items:center;margin-bottom:6px;font-size:.75rem}
+.hist-label{width:60px;text-align:right;padding-right:8px;color:var(--dim)}
+.hist-bar-wrap{flex:1;height:22px;background:#1a2332;border-radius:4px;position:relative;overflow:hidden}
+.hist-bar{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:600;min-width:2px;transition:width .5s}
+.hist-info{width:100px;text-align:right;padding-left:8px;color:var(--dim)}
+@media(max-width:600px){.card .value{font-size:1.4rem}.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>⚡ Polymarket BTC Predictor</h1>
+<div class="sub">Live Paper Trading Dashboard</div>
+<div class="sub" id="startTime"></div>
+<div class="sub"><span class="live-dot"></span><span id="lastUpdate">Loading...</span></div>
+</div>
+
+<div class="stats" id="statsCards">
+<div class="card"><div class="label">Total Predictions</div><div class="value" id="sTotal">—</div><div class="extra" id="sTotalExtra"></div></div>
+<div class="card"><div class="label">Win Rate</div><div class="value" id="sWinRate">—</div><div class="extra" id="sWinRateExtra"></div></div>
+<div class="card"><div class="label">Confident Win Rate</div><div class="value" id="sConfWR">—</div><div class="extra" id="sConfWRExtra"></div></div>
+<div class="card"><div class="label">Paper P&L</div><div class="value" id="sPnl">—</div><div class="extra" id="sPnlExtra"></div></div>
+<div class="card"><div class="label">Skipped</div><div class="value dim" id="sSkip">—</div></div>
+</div>
+
+<div class="section">
+<h2>📈 Rolling Win Rate (last 20 trades)</h2>
+<canvas id="chartWR" height="200"></canvas>
+</div>
+
+<div class="section">
+<h2>📊 Confidence Distribution & Win Rate</h2>
+<div id="histogram"></div>
+</div>
+
+<div class="section">
+<h2>📋 Recent Trades</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Time</th><th>Market</th><th>Pred</th><th>Conf</th><th>Actual</th><th>Result</th><th>BTC Start</th><th>BTC End</th></tr></thead>
+<tbody id="tradesBody"></tbody>
+</table>
+</div>
+</div>
+
+<div class="footer">Auto-refreshes every 30s · Data from results.json · <a href="https://github.com/0xMikey-ooze/polymarket-predictor" target="_blank">GitHub</a></div>
+
+<script>
+let lastFetch=0;
+function fmt(n,d=1){return n==null?'—':Number(n).toFixed(d)}
+function fmtPct(n){return n==null?'—':fmt(n,1)+'%'}
+function fmtUSD(n){if(n==null)return'—';let s=n>=0?'+':'';return s+'$'+fmt(Math.abs(n),2)}
+function timeAgo(iso){if(!iso)return'';let d=Math.floor((Date.now()-new Date(iso))/1000);if(d<60)return d+'s ago';if(d<3600)return Math.floor(d/60)+'m ago';return Math.floor(d/3600)+'h ago'}
+function shortTime(iso){if(!iso)return'—';let d=new Date(iso);return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+function shortSlug(s){if(!s)return'—';return s.replace('btc-updown-','').replace(/-/g,' ').slice(0,20)}
+
+function drawWRChart(trades){
+  const c=document.getElementById('chartWR'),ctx=c.getContext('2d');
+  const W=c.parentElement.clientWidth-32;c.width=W*2;c.height=400;c.style.height='200px';
+  ctx.scale(2,2);const w=W,h=200;
+  if(trades.length<2){ctx.fillStyle='#64748b';ctx.font='14px monospace';ctx.fillText('Need more trades...',w/2-60,h/2);return}
+  // compute rolling 20 win rate
+  let pts=[];
+  for(let i=0;i<trades.length;i++){
+    let start=Math.max(0,i-19),win=0,tot=0;
+    for(let j=start;j<=i;j++){if(trades[j].result==='WIN')win++;tot++}
+    pts.push(win/tot*100);
+  }
+  const pad={t:20,b:30,l:40,r:10},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;
+  const mn=Math.min(...pts,45),mx=Math.max(...pts,55);
+  const yMin=Math.floor(mn/5)*5,yMax=Math.ceil(mx/5)*5||100;
+  const xStep=pw/(pts.length-1||1);
+  // grid
+  ctx.strokeStyle='#1e2a3a';ctx.lineWidth=.5;
+  for(let y=yMin;y<=yMax;y+=5){let py=pad.t+ph-(y-yMin)/(yMax-yMin)*ph;ctx.beginPath();ctx.moveTo(pad.l,py);ctx.lineTo(w-pad.r,py);ctx.stroke();ctx.fillStyle='#64748b';ctx.font='10px monospace';ctx.fillText(y+'%',2,py+3)}
+  // 50% line
+  if(yMin<=50&&50<=yMax){let py=pad.t+ph-(50-yMin)/(yMax-yMin)*ph;ctx.strokeStyle='#ef444444';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(pad.l,py);ctx.lineTo(w-pad.r,py);ctx.stroke();ctx.setLineDash([])}
+  // line
+  ctx.beginPath();ctx.strokeStyle='#3b82f6';ctx.lineWidth=2;
+  pts.forEach((v,i)=>{let x=pad.l+i*xStep,y=pad.t+ph-(v-yMin)/(yMax-yMin)*ph;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+  ctx.stroke();
+  // gradient fill
+  let last=pts.length-1;
+  ctx.lineTo(pad.l+last*xStep,pad.t+ph);ctx.lineTo(pad.l,pad.t+ph);ctx.closePath();
+  let grd=ctx.createLinearGradient(0,pad.t,0,pad.t+ph);grd.addColorStop(0,'#3b82f633');grd.addColorStop(1,'#3b82f600');ctx.fillStyle=grd;ctx.fill();
+}
+
+function drawHistogram(trades){
+  const buckets=[{l:40,h:45,label:'40-45%'},{l:45,h:50,label:'45-50%'},{l:50,h:55,label:'50-55%'},{l:55,h:60,label:'55-60%'},{l:60,h:65,label:'60-65%'},{l:65,h:70,label:'65-70%'},{l:70,h:100,label:'70%+'}];
+  let data=buckets.map(b=>{let t=trades.filter(tr=>{let c=tr.confidence*100;return c>=b.l&&c<b.h});let w=t.filter(tr=>tr.result==='WIN').length;return{label:b.label,count:t.length,wins:w,wr:t.length?w/t.length*100:0}});
+  let maxC=Math.max(...data.map(d=>d.count),1);
+  let html='';
+  data.forEach(d=>{
+    let pct=d.count/maxC*100;
+    let color=d.wr>=55?'var(--green)':d.wr>=50?'var(--blue)':'var(--red)';
+    html+=`<div class="hist-row"><span class="hist-label">${d.label}</span><div class="hist-bar-wrap"><div class="hist-bar" style="width:${pct}%;background:${color}88">${d.count}</div></div><span class="hist-info">${d.count?fmtPct(d.wr)+' WR':'-'}</span></div>`;
+  });
+  document.getElementById('histogram').innerHTML=html;
+}
+
+function renderTrades(trades){
+  let rows=trades.slice(-50).reverse().map(t=>{
+    let predCls=t.prediction==='UP'?'badge-up':'badge-down';
+    let resCls=t.result==='WIN'?'badge-win':t.result==='LOSS'?'badge-loss':'badge-skip';
+    return `<tr><td>${shortTime(t.time)}</td><td>${shortSlug(t.market_slug)}</td><td><span class="badge ${predCls}">${t.prediction||'—'}</span></td><td>${fmt(t.confidence*100,0)}%</td><td>${t.actual||'—'}</td><td><span class="badge ${resCls}">${t.result||'—'}</span></td><td>${t.btc_price_start?'$'+Number(t.btc_price_start).toLocaleString():'—'}</td><td>${t.btc_price_end?'$'+Number(t.btc_price_end).toLocaleString():'—'}</td></tr>`;
+  }).join('');
+  document.getElementById('tradesBody').innerHTML=rows||'<tr><td colspan="8" style="text-align:center;color:var(--dim)">No trades yet</td></tr>';
+}
+
+async function load(){
+  try{
+    let r=await fetch('results.json?t='+Date.now());
+    if(!r.ok)throw new Error(r.status);
+    let d=await r.json();lastFetch=Date.now();
+    // header
+    document.getElementById('startTime').textContent=d.started?'Started: '+new Date(d.started).toLocaleString():'';
+    // stats
+    document.getElementById('sTotal').textContent=d.total_predictions||0;
+    document.getElementById('sTotalExtra').textContent=`${d.correct||0}W / ${d.wrong||0}L`;
+    let wr=d.win_rate||0;
+    let wrEl=document.getElementById('sWinRate');wrEl.textContent=fmtPct(wr);wrEl.className='value '+(wr>55?'green':wr<50?'red':'yellow');
+    document.getElementById('sWinRateExtra').textContent=`${d.correct||0} of ${(d.correct||0)+(d.wrong||0)}`;
+    let cwr=d.confident_win_rate||0;
+    let cwrEl=document.getElementById('sConfWR');cwrEl.textContent=fmtPct(cwr);cwrEl.className='value '+(cwr>55?'green':cwr<50?'red':'yellow');
+    document.getElementById('sConfWRExtra').textContent=`${d.confident_correct||0} of ${d.confident_predictions||0} (>60% conf)`;
+    let pnl=d.pnl_if_real||0;
+    let pnlEl=document.getElementById('sPnl');pnlEl.textContent=fmtUSD(pnl);pnlEl.className='value '+(pnl>=0?'green':'red');
+    document.getElementById('sSkip').textContent=d.skipped||0;
+    // charts
+    let trades=(d.trades||[]).filter(t=>t.result==='WIN'||t.result==='LOSS');
+    drawWRChart(trades);drawHistogram(trades);renderTrades(d.trades||[]);
+  }catch(e){console.warn('Fetch error:',e)}
+}
+
+setInterval(()=>{if(lastFetch){let s=Math.floor((Date.now()-lastFetch)/1000);document.getElementById('lastUpdate').textContent='Last updated: '+s+'s ago'}},1000);
+load();setInterval(load,30000);
+window.addEventListener('resize',load);
+</script>
+</body>
+</html>

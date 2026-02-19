@@ -1,0 +1,14 @@
+{
+  "BTC": {
+    "total": 50,
+    "bets": 30,
+    "wins": 14,
+    "skips": 20
+  },
+  "ETH": {
+    "total": 50,
+    "bets": 21,
+    "wins": 12,
+    "skips": 29
+  }
+}

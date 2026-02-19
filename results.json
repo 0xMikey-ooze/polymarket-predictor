@@ -1,0 +1,314 @@
+{
+  "started": "2026-02-19T13:17:15.682352",
+  "total_predictions": 30,
+  "correct": 14,
+  "wrong": 16,
+  "skipped": 20,
+  "win_rate": 46.7,
+  "confident_predictions": 15,
+  "confident_correct": 8,
+  "confident_win_rate": 53.3,
+  "pnl_if_real": -2,
+  "trades": [
+    {
+      "time": "2026-02-19T13:17:15.682352",
+      "market_slug": "btc-updown-5m-2026-02-19-131500",
+      "prediction": "UP",
+      "confidence": 0.6154000163078308,
+      "actual": "DOWN",
+      "result": "LOSS",
+      "btc_price_start": 66324.4,
+      "btc_price_end": 66204.6
+    },
+    {
+      "time": "2026-02-19T13:20:15.000178",
+      "market_slug": "btc-updown-5m-2026-02-19-132000",
+      "prediction": "UP",
+      "confidence": 0.5626999735832214,
+      "actual": "DOWN",
+      "result": "LOSS",
+      "btc_price_start": 66204.6,
+      "btc_price_end": 66193.5
+    },
+    {
+      "time": "2026-02-19T13:25:15.000169",
+      "market_slug": "btc-updown-5m-2026-02-19-132500",
+      "prediction": "UP",
+      "confidence": 0.5583000183105469,
+      "actual": "DOWN",
+      "result": "LOSS",
+      "btc_price_start": 66193.5,
+      "btc_price_end": 66179.8
+    },
+    {
+      "time": "2026-02-19T13:35:15.000177",
+      "market_slug": "btc-updown-5m-2026-02-19-133500",
+      "prediction": "DOWN",
+      "confidence": 0.6132000088691711,
+      "actual": "DOWN",
+      "result": "WIN",
+      "btc_price_start": 66264.1,
+      "btc_price_end": 66071.7
+    },
+    {
+      "time": "2026-02-19T13:40:15.000177",
+      "market_slug": "btc-updown-5m-2026-02-19-134000",
+      "prediction": "UP",
+      "confidence": 0.6672999858856201,
+      "actual": "DOWN",
+      "result": "LOSS",
+      "btc_price_start": 66071.7,
+      "btc_price_end": 65965.4
+    },
+    {
+      "time": "2026-02-19T13:55:15.000172",
+      "market_slug": "btc-updown-5m-2026-02-19-135500",
+      "prediction": "UP",
+      "confidence": 0.5615000128746033,
+      "actual": "DOWN",
+      "result": "LOSS",
+      "btc_price_start": 65960.3,
+      "btc_price_end": 65949.0
+    },
+    {
+      "time": "2026-02-19T14:00:15.000159",
+      "market_slug": "btc-updown-5m-2026-02-19-140000",
+      "prediction": "UP",
+      "confidence": 0.6518999934196472,
+      "actual": "DOWN",
+      "result": "LOSS",
+      "btc_price_start": 65949.0,
+      "btc_price_end": 65883.2
+    },
+    {
+      "time": "2026-02-19T14:05:15.000858",
+      "market_slug": "btc-updown-5m-2026-02-19-140500",
+      "prediction": "UP",
+      "confidence": 0.6150000095367432,
+      "actual": "UP",
+      "result": "WIN",
+      "btc_price_start": 65883.2,
+      "btc_price_end": 65938.0
+    },
+    {
+      "time": "2026-02-19T14:20:15.000163",
+      "market_slug": "btc-updown-5m-2026-02-19-142000",
+      "prediction": "UP",
+      "confidence": 0.6826000213623047,
+      "actual": "UP",
+      "result": "WIN",
+      "btc_price_start": 65972.4,
+      "btc_price_end": 66016.5
+    },
+    {
+      "time": "2026-02-19T14:25:15.000166",
+      "market_slug": "btc-updown-5m-2026-02-19-142500",
+      "prediction": "DOWN",
+      "confidence": 0.5922999978065491,
+      "actual": "DOWN",
+      "result": "WIN",
+      "btc_price_start": 66016.5,
+      "btc_price_end": 65980.1
+    },
+    {
+      "time": "2026-02-19T14:45:15.000176",
+      "market_slug": "btc-updown-5m-2026-02-19-144500",
+      "prediction": "UP",
+      "confidence": 0.5677000284194946,
+      "actual": "UP",
+      "result": "WIN",
+      "btc_price_start": 66205.0,
+      "btc_price_end": 66281.8
+    },
+    {
+      "time": "2026-02-19T14:55:15.000150",
+      "market_slug": "btc-updown-5m-2026-02-19-145500",
+      "prediction": "DOWN",
+      "confidence": 0.6205999851226807,
+      "actual": "DOWN",
+      "result": "WIN",
+      "btc_price_start": 66522.3,
+      "btc_price_end": 66422.0
+    },
+    {
+      "time": "2026-02-19T15:00:15.000107",
+      "market_slug": "btc-updown-5m-2026-02-19-150000",
+      "prediction": "UP",
+      "confidence": 0.5644000172615051,
+      "actual": "UP",
+      "result": "WIN",
+      "btc_price_start": 66422.0,
+      "btc_price_end": 66630.0
+    },
+    {
+      "time": "2026-02-19T15:10:15.000158",
+      "market_slug": "btc-updown-5m-2026-02-19-151000",
+      "prediction": "UP",
+      "confidence": 0.5817000269889832,
+      "actual": "DOWN",
+      "result": "LOSS",
+      "btc_price_start": 66405.1,
+      "btc_price_end": 66164.5
+    },
+    {
+      "time": "2026-02-19T15:15:15.000156",
+      "market_slug": "btc-updown-5m-2026-02-19-151500",
+      "prediction": "DOWN",
+      "confidence": 0.5830000042915344,
+      "actual": "UP",
+      "result": "LOSS",
+      "btc_price_start": 66164.5,
+      "btc_price_end": 66198.2
+    },
+    {
+      "time": "2026-02-19T15:20:15.000163",
+      "market_slug": "btc-updown-5m-2026-02-19-152000",
+      "prediction": "DOWN",
+      "confidence": 0.6499999761581421,
+      "actual": "DOWN",
+      "result": "WIN",
+      "btc_price_start": 66198.2,
+      "btc_price_end": 66177.8
+    },
+    {
+      "time": "2026-02-19T15:35:15.000159",
+      "market_slug": "btc-updown-5m-2026-02-19-153500",
+      "prediction": "DOWN",
+      "confidence": 0.6116999983787537,
+      "actual": "UP",
+      "result": "LOSS",
+      "btc_price_start": 66399.7,
+      "btc_price_end": 66421.6
+    },
+    {
+      "time": "2026-02-19T15:40:15.000164",
+      "market_slug": "btc-updown-5m-2026-02-19-154000",
+      "prediction": "DOWN",
+      "confidence": 0.692300021648407,
+      "actual": "UP",
+      "result": "LOSS",
+      "btc_price_start": 66421.6,
+      "btc_price_end": 66481.7
+    },
+    {
+      "time": "2026-02-19T15:45:15.000128",
+      "market_slug": "btc-updown-5m-2026-02-19-154500",
+      "prediction": "DOWN",
+      "confidence": 0.6263999938964844,
+      "actual": "DOWN",
+      "result": "WIN",
+      "btc_price_start": 66481.7,
+      "btc_price_end": 66305.2
+    },
+    {
+      "time": "2026-02-19T15:50:15.000191",
+      "market_slug": "btc-updown-5m-2026-02-19-155000",
+      "prediction": "UP",
+      "confidence": 0.5511999726295471,
+      "actual": "UP",
+      "result": "WIN",
+      "btc_price_start": 66305.2,
+      "btc_price_end": 66327.4
+    },
+    {
+      "time": "2026-02-19T15:55:15.000757",
+      "market_slug": "btc-updown-5m-2026-02-19-155500",
+      "prediction": "DOWN",
+      "confidence": 0.6862000226974487,
+      "actual": "UP",
+      "result": "LOSS",
+      "btc_price_start": 66327.4,
+      "btc_price_end": 66358.7
+    },
+    {
+      "time": "2026-02-19T16:00:15.000174",
+      "market_slug": "btc-updown-5m-2026-02-19-160000",
+      "prediction": "DOWN",
+      "confidence": 0.5756000280380249,
+      "actual": "DOWN",
+      "result": "WIN",
+      "btc_price_start": 66358.7,
+      "btc_price_end": 66152.2
+    },
+    {
+      "time": "2026-02-19T16:10:15.000163",
+      "market_slug": "btc-updown-5m-2026-02-19-161000",
+      "prediction": "DOWN",
+      "confidence": 0.6359999775886536,
+      "actual": "UP",
+      "result": "LOSS",
+      "btc_price_start": 66155.2,
+      "btc_price_end": 66158.6
+    },
+    {
+      "time": "2026-02-19T16:15:15.000154",
+      "market_slug": "btc-updown-5m-2026-02-19-161500",
+      "prediction": "DOWN",
+      "confidence": 0.5630999803543091,
+      "actual": "UP",
+      "result": "LOSS",
+      "btc_price_start": 66158.6,
+      "btc_price_end": 66343.3
+    },
+    {
+      "time": "2026-02-19T16:20:15.000175",
+      "market_slug": "btc-updown-5m-2026-02-19-162000",
+      "prediction": "DOWN",
+      "confidence": 0.7263000011444092,
+      "actual": "DOWN",
+      "result": "WIN",
+      "btc_price_start": 66343.3,
+      "btc_price_end": 66254.3
+    },
+    {
+      "time": "2026-02-19T16:35:15.000186",
+      "market_slug": "btc-updown-5m-2026-02-19-163500",
+      "prediction": "DOWN",
+      "confidence": 0.59170001745224,
+      "actual": "UP",
+      "result": "LOSS",
+      "btc_price_start": 66474.9,
+      "btc_price_end": 66490.4
+    },
+    {
+      "time": "2026-02-19T16:40:15.000144",
+      "market_slug": "btc-updown-5m-2026-02-19-164000",
+      "prediction": "UP",
+      "confidence": 0.567799985408783,
+      "actual": "DOWN",
+      "result": "LOSS",
+      "btc_price_start": 66490.4,
+      "btc_price_end": 66433.9
+    },
+    {
+      "time": "2026-02-19T16:45:15.000169",
+      "market_slug": "btc-updown-5m-2026-02-19-164500",
+      "prediction": "UP",
+      "confidence": 0.5552999973297119,
+      "actual": "DOWN",
+      "result": "LOSS",
+      "btc_price_start": 66433.9,
+      "btc_price_end": 66312.8
+    },
+    {
+      "time": "2026-02-19T16:50:15.000140",
+      "market_slug": "btc-updown-5m-2026-02-19-165000",
+      "prediction": "UP",
+      "confidence": 0.621999979019165,
+      "actual": "UP",
+      "result": "WIN",
+      "btc_price_start": 66312.8,
+      "btc_price_end": 66433.1
+    },
+    {
+      "time": "2026-02-19T16:55:15.000169",
+      "market_slug": "btc-updown-5m-2026-02-19-165500",
+      "prediction": "DOWN",
+      "confidence": 0.5511000156402588,
+      "actual": "DOWN",
+      "result": "WIN",
+      "btc_price_start": 66433.1,
+      "btc_price_end": 66352.7
+    }
+  ]
+}
