@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Paper trading bot v3 — Adaptive 5-min crypto prediction.
-Features: rolling retrain, adaptive confidence, regime detection, trade memory feedback.
+Paper trading bot v4 — Fixed threshold 0.55, regime-adjusted.
 Fixes (v3): rolling regime (no look-ahead), next-candle resolve, FLAT exclusion verified.
+Fix  (v4): replaced adaptive threshold with fixed 0.55 — backtest showed adaptive
+           reacted to noise (lag-1 autocorr=0.0075), costing 0.82 Sharpe vs fixed.
 """
 import requests, pandas as pd, numpy as np, time, json, os, sys
 from datetime import datetime, timedelta
@@ -20,8 +21,14 @@ os.makedirs(LOG_DIR, exist_ok=True)
 
 COINS = {'ETH': 'ETH-USDT'}
 
+# Backtest (305 trades, 2026-02-19→22) proved fixed 0.55 beats adaptive:
+# Fixed 0.55: Sharpe=2.18, WR=58.8%, PnL=$353
+# Adaptive:   Sharpe=1.36, WR=57.8%, PnL=$164
+# Lag-1 autocorr=0.0075 → outcomes are independent, adaptive reacts to noise.
+FIXED_THRESHOLD = 0.55
+
 # ============================================================
-# ADAPTIVE CONFIDENCE SYSTEM
+# ADAPTIVE CONFIDENCE SYSTEM (kept for reference, no longer used for threshold)
 # ============================================================
 class AdaptiveConfidence:
     """Adjusts confidence threshold based on recent performance."""
@@ -601,7 +608,7 @@ def main():
     print(f"{'='*60}", flush=True)
     print(f"  Paper Trading Bot v2 — Adaptive 5min Prediction", flush=True)
     print(f"  Coins: {', '.join(COINS.keys())}", flush=True)
-    print(f"  Base confidence: 0.55 (adaptive: {adaptive_conf.get_threshold():.1%})", flush=True)
+    print(f"  Confidence threshold: {FIXED_THRESHOLD:.2f} FIXED (+regime micro-adj)", flush=True)
     print(f"  Retrain interval: every 2h (24 cycles)", flush=True)
     print(f"  Trade memory: {len(trade_memory.trades)} historical trades loaded", flush=True)
     print(f"  Log: {LOG_FILE}", flush=True)
@@ -649,8 +656,7 @@ def main():
                         stats[coin]['bets'] += 1
                         if r['correct']:
                             stats[coin]['wins'] += 1
-                        # Feed into adaptive systems
-                        adaptive_conf.update(r['correct'])
+                        # Feed trade memory (adaptive threshold removed — v4)
                         trade_memory.add_trade(r)
                 
                 # New candle?
@@ -670,9 +676,9 @@ def main():
                 
                 confidence = max(prob_up, 1 - prob_up)
                 direction = 'UP' if prob_up > 0.5 else 'DOWN'
-                threshold = adaptive_conf.get_threshold()
-                
-                # Regime-based threshold adjustment
+                threshold = FIXED_THRESHOLD  # v4: fixed 0.55, beats adaptive by 0.82 Sharpe
+
+                # Regime-based micro-adjustment (market structure, not outcome history)
                 if regime == RegimeDetector.VOLATILE:
                     threshold = min(0.70, threshold + 0.03)  # More selective in volatile markets
                 elif regime == RegimeDetector.TRENDING:
@@ -702,7 +708,7 @@ def main():
                 s = stats[coin]
                 if s['bets'] > 0:
                     wr = s['wins'] / s['bets'] * 100
-                    print(f"         Stats: {s['bets']} bets, {s['wins']} wins ({wr:.1f}%), {s['skips']} skips | {adaptive_conf.status()}", flush=True)
+                    print(f"         Stats: {s['bets']} bets, {s['wins']} wins ({wr:.1f}%), {s['skips']} skips | thresh={threshold:.2f} regime={regime}", flush=True)
                 
             except Exception as e:
                 print(f"  [{coin}] Error: {e}", flush=True)
@@ -719,7 +725,7 @@ def main():
                     df = fetch_training_data(inst)
                     regime_detector.detect(df)
                     models[coin] = train_model(df, regime_detector, trade_memory)
-                    print(f"  {coin} retrained ✓ regime={regime_detector.current_regime} | {adaptive_conf.status()}", flush=True)
+                    print(f"  {coin} retrained ✓ regime={regime_detector.current_regime} | thresh={FIXED_THRESHOLD:.2f} (fixed)", flush=True)
                 except Exception as e:
                     print(f"  {coin} retrain error: {e}", flush=True)
             
