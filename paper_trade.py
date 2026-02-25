@@ -11,13 +11,11 @@ Fix  (v6): Replaced XGBoost predictor with pre-trained LightGBM (2yr ETH 5m).
 """
 import requests, pandas as pd, numpy as np, time, json, os, sys, pickle
 from datetime import datetime, timedelta
-from xgboost import XGBClassifier
-from sklearn.preprocessing import StandardScaler
 from collections import deque
 import warnings
 warnings.filterwarnings('ignore')
 
-LOG_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_DIR = os.environ.get('LOG_DIR', os.path.dirname(os.path.abspath(__file__)))
 LOG_FILE = os.path.join(LOG_DIR, 'paper_trades.jsonl')
 STATS_FILE = os.path.join(LOG_DIR, 'stats.json')
 ADAPTIVE_FILE = os.path.join(LOG_DIR, 'adaptive_state.json')
@@ -49,6 +47,8 @@ class LGBMPredictor:
                 'vwap_dev','adx','vol_regime']
 
     def __init__(self):
+        if not os.path.exists(MODEL_PATH):
+            raise FileNotFoundError(f'[lgbm] Model not found at {MODEL_PATH}. Run ml-model/fetch_history.py + train_model.py first.')
         with open(MODEL_PATH, 'rb') as f:
             self.model = pickle.load(f)
         logging.info('[lgbm] Model loaded from %s', MODEL_PATH)
@@ -644,36 +644,6 @@ def fetch_recent_candles(inst_id, bar='5m', limit=300):
     return None
 
 
-def train_model(df, regime_detector=None, trade_memory=None):
-    d = engineer_features(df, regime_detector, trade_memory, training_mode=True)
-    d = d.dropna(subset=FEATURE_COLS + ['target'])
-    d = d.iloc[:-1]
-    
-    X = np.nan_to_num(d[FEATURE_COLS].values, nan=0, posinf=0, neginf=0)
-    y = d['target'].values
-    
-    model = XGBClassifier(
-        n_estimators=300, max_depth=4, learning_rate=0.05,
-        subsample=0.8, colsample_bytree=0.8,
-        min_child_weight=50, reg_alpha=0.1, reg_lambda=1.0,
-        eval_metric='logloss', verbosity=0, n_jobs=-1
-    )
-    model.fit(X, y)
-    return model
-
-
-def predict(model, df, regime_detector=None, trade_memory=None):
-    d = engineer_features(df, regime_detector, trade_memory)
-    d = d.dropna(subset=FEATURE_COLS)
-    if len(d) == 0:
-        return None, None
-    
-    last = d.iloc[-1:]
-    X = np.nan_to_num(last[FEATURE_COLS].values, nan=0, posinf=0, neginf=0)
-    prob_up = model.predict_proba(X)[0][1]
-    return prob_up, last['close'].values[0]
-
-
 def load_stats():
     if os.path.exists(STATS_FILE):
         return json.load(open(STATS_FILE))
@@ -756,7 +726,11 @@ def main():
     adaptive_conf = AdaptiveConfidence(base=0.55, min_thresh=0.52, max_thresh=0.70)
     regime_detector = RegimeDetector()
     trade_memory = TradeMemory()
-    lgbm_predictor = LGBMPredictor()
+    try:
+        lgbm_predictor = LGBMPredictor()
+    except FileNotFoundError as e:
+        logging.error(str(e))
+        sys.exit(1)
     
     # Load trade history into memory
     trade_memory.load_from_log()
@@ -774,27 +748,13 @@ def main():
     print(f"  Paper Trading Bot v2 — Adaptive 5min Prediction", flush=True)
     print(f"  Coins: {', '.join(COINS.keys())}", flush=True)
     print(f"  Confidence threshold: {FIXED_THRESHOLD:.2f} FIXED (+regime micro-adj)", flush=True)
-    print(f"  Retrain interval: every 2h (24 cycles)", flush=True)
+    print(f"  Regime refresh interval: every 2h (24 cycles)", flush=True)
     print(f"  Trade memory: {len(trade_memory.trades)} historical trades loaded", flush=True)
     print(f"  Log: {LOG_FILE}", flush=True)
     print(f"{'='*60}\n", flush=True)
     
-    # Initial training
-    models = {}
-    print("Training models on recent history...", flush=True)
-    for coin, inst in COINS.items():
-        print(f"  Fetching {coin} training data...", flush=True)
-        df = fetch_training_data(inst)
-        print(f"  {coin}: {len(df):,} candles ({df['time'].min()} → {df['time'].max()})", flush=True)
-        
-        regime_detector.detect(df)
-        print(f"  {coin} regime: {regime_detector.current_regime} (conf={regime_detector.regime_confidence:.2f})", flush=True)
-        
-        models[coin] = train_model(df, regime_detector, trade_memory)
-        print(f"  {coin} model trained ✓", flush=True)
-    
     stats = load_stats()
-    print(f"\nModels ready. Starting adaptive trading loop...\n", flush=True)
+    print(f"\nStarting trading loop...\n", flush=True)
     
     last_candle_time = {}
     retrain_counter = 0
@@ -889,20 +849,19 @@ def main():
         
         save_stats(stats)
         
-        # Rolling retrain every 2 hours
+        # Regime refresh every 2 hours
         retrain_counter += 1
         if retrain_counter >= RETRAIN_INTERVAL:
             retrain_counter = 0
-            print(f"\n  🔄 Retraining models (every {RETRAIN_INTERVAL * 5}min)...", flush=True)
             for coin, inst in COINS.items():
                 try:
-                    df = fetch_training_data(inst)
-                    regime_detector.detect(df)
-                    models[coin] = train_model(df, regime_detector, trade_memory)
-                    print(f"  {coin} retrained ✓ regime={regime_detector.current_regime} | thresh={FIXED_THRESHOLD:.2f} (fixed)", flush=True)
+                    df = fetch_recent_candles(inst, '5m', 300)
+                    if df is not None:
+                        regime_detector.detect(df)
+                        logging.info('%s regime refreshed: %s', coin, regime_detector.current_regime)
                 except Exception as e:
-                    print(f"  {coin} retrain error: {e}", flush=True)
-            
+                    logging.warning('%s regime refresh error: %s', coin, e)
+
             save_adaptive_state(adaptive_conf, regime_detector, retrain_counter)
         
         # Wait for next 5-min candle
