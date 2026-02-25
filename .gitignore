@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+*.log
+bot.pid
+.last_sync_line
+adaptive_state.json
+
+# Large data files — don't commit CSVs
+ml-model/data/
+ml-model/venv/
+
+# Keep model pkl files (small enough)

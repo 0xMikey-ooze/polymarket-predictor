@@ -1,0 +1,170 @@
+{
+  "BTC_5m": {
+    "avg_wr": 0.56,
+    "avg_threshold": 0.56,
+    "folds": [
+      {
+        "wr": 0.533,
+        "threshold": 0.53,
+        "n_trades": 3149,
+        "brier": 0.2497
+      },
+      {
+        "wr": 0.571,
+        "threshold": 0.56,
+        "n_trades": 35,
+        "brier": 0.2497
+      },
+      {
+        "wr": 0.564,
+        "threshold": 0.55,
+        "n_trades": 482,
+        "brier": 0.2495
+      },
+      {
+        "wr": 0.544,
+        "threshold": 0.55,
+        "n_trades": 752,
+        "brier": 0.2497
+      },
+      {
+        "wr": 0.588,
+        "threshold": 0.61,
+        "n_trades": 165,
+        "brier": 0.2493
+      }
+    ],
+    "top_features": [
+      "adx",
+      "vol_ratio",
+      "mom1"
+    ],
+    "dataset_rows": 210251
+  },
+  "BTC_15m": {
+    "avg_wr": 0.629,
+    "avg_threshold": 0.58,
+    "folds": [
+      {
+        "wr": 0.6,
+        "threshold": 0.56,
+        "n_trades": 20,
+        "brier": 0.2496
+      },
+      {
+        "wr": 0.677,
+        "threshold": 0.56,
+        "n_trades": 62,
+        "brier": 0.2495
+      },
+      {
+        "wr": 0.639,
+        "threshold": 0.59,
+        "n_trades": 61,
+        "brier": 0.2492
+      },
+      {
+        "wr": 0.652,
+        "threshold": 0.63,
+        "n_trades": 23,
+        "brier": 0.2492
+      },
+      {
+        "wr": 0.578,
+        "threshold": 0.56,
+        "n_trades": 715,
+        "brier": 0.2488
+      }
+    ],
+    "top_features": [
+      "adx",
+      "vol_ratio",
+      "ha_body"
+    ],
+    "dataset_rows": 70151
+  },
+  "SOL_5m": {
+    "avg_wr": 0.655,
+    "avg_threshold": 0.57,
+    "folds": [
+      {
+        "wr": 0.559,
+        "threshold": 0.52,
+        "n_trades": 102,
+        "brier": 0.25
+      },
+      {
+        "wr": 0.645,
+        "threshold": 0.58,
+        "n_trades": 31,
+        "brier": 0.2498
+      },
+      {
+        "wr": 0.724,
+        "threshold": 0.61,
+        "n_trades": 29,
+        "brier": 0.2496
+      },
+      {
+        "wr": 0.773,
+        "threshold": 0.6,
+        "n_trades": 22,
+        "brier": 0.2496
+      },
+      {
+        "wr": 0.576,
+        "threshold": 0.54,
+        "n_trades": 519,
+        "brier": 0.2497
+      }
+    ],
+    "top_features": [
+      "adx",
+      "vol_ratio",
+      "obv_zscore"
+    ],
+    "dataset_rows": 210251
+  },
+  "SOL_15m": {
+    "avg_wr": 0.614,
+    "avg_threshold": 0.58,
+    "folds": [
+      {
+        "wr": 0.602,
+        "threshold": 0.58,
+        "n_trades": 93,
+        "brier": 0.2495
+      },
+      {
+        "wr": 0.652,
+        "threshold": 0.6,
+        "n_trades": 132,
+        "brier": 0.2494
+      },
+      {
+        "wr": 0.623,
+        "threshold": 0.6,
+        "n_trades": 69,
+        "brier": 0.2494
+      },
+      {
+        "wr": 0.65,
+        "threshold": 0.58,
+        "n_trades": 20,
+        "brier": 0.2496
+      },
+      {
+        "wr": 0.545,
+        "threshold": 0.55,
+        "n_trades": 178,
+        "brier": 0.2495
+      }
+    ],
+    "top_features": [
+      "adx",
+      "vol_ratio",
+      "mom1"
+    ],
+    "dataset_rows": 70151
+  }
+}

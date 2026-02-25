@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """
-Paper trading bot v4 — Fixed threshold 0.55, regime-adjusted.
+Paper trading bot v6 — LightGBM 2yr, ADX≥20 gate, vol_ratio≥1.1 gate, threshold 0.62
 Fixes (v3): rolling regime (no look-ahead), next-candle resolve, FLAT exclusion verified.
 Fix  (v4): replaced adaptive threshold with fixed 0.55 — backtest showed adaptive
            reacted to noise (lag-1 autocorr=0.0075), costing 0.82 Sharpe vs fixed.
+Fix  (v5): threshold 0.55→0.62 (backtest knee: 61.6% WR vs 56.8% at 0.55).
+           Added: Heikin Ashi features, true VWAP deviation, Williams %R.
+Fix  (v6): Replaced XGBoost predictor with pre-trained LightGBM (2yr ETH 5m).
+           Added ADX≥20 gate (trending market) and vol_ratio≥1.1 gate.
 """
-import requests, pandas as pd, numpy as np, time, json, os, sys
+import requests, pandas as pd, numpy as np, time, json, os, sys, pickle
 from datetime import datetime, timedelta
 from xgboost import XGBClassifier
 from sklearn.preprocessing import StandardScaler
@@ -13,7 +17,7 @@ from collections import deque
 import warnings
 warnings.filterwarnings('ignore')
 
-LOG_DIR = '/home/node/.openclaw/workspace/polymarket-predictor'
+LOG_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_FILE = os.path.join(LOG_DIR, 'paper_trades.jsonl')
 STATS_FILE = os.path.join(LOG_DIR, 'stats.json')
 ADAPTIVE_FILE = os.path.join(LOG_DIR, 'adaptive_state.json')
@@ -25,7 +29,135 @@ COINS = {'ETH': 'ETH-USDT'}
 # Fixed 0.55: Sharpe=2.18, WR=58.8%, PnL=$353
 # Adaptive:   Sharpe=1.36, WR=57.8%, PnL=$164
 # Lag-1 autocorr=0.0075 → outcomes are independent, adaptive reacts to noise.
-FIXED_THRESHOLD = 0.55
+# v5 backtest (52k candles, walk-forward): knee at 0.62 → 61.6% WR vs 56.8% at 0.55.
+FIXED_THRESHOLD = 0.62
+
+MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ml-model', 'model_5m.pkl')
+
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+
+
+class LGBMPredictor:
+    """Loads pre-trained LightGBM ETH 5m model and generates predictions."""
+
+    FEATURES = ['rsi14','rsi7','macd','macd_signal','macd_hist',
+                'bb_pctb','bb_bandwidth','williams_r','atr14_norm',
+                'ema5_20_cross','ema20_50_cross','price_vs_ema50',
+                'mom1','mom3','mom5','mom10',
+                'obv_zscore','vol_ratio','ha_trend','ha_body',
+                'vwap_dev','adx','vol_regime']
+
+    def __init__(self):
+        with open(MODEL_PATH, 'rb') as f:
+            self.model = pickle.load(f)
+        logging.info('[lgbm] Model loaded from %s', MODEL_PATH)
+
+    def predict(self, candles: list) -> dict:
+        """
+        candles: list of dicts with keys ts, open, high, low, close, vol
+        Returns dict with prob_up, prob_down, adx, vol_ratio, skip (bool)
+        """
+        import pandas as pd
+        import numpy as np
+
+        df = pd.DataFrame(candles)
+        df = df.rename(columns={'vol': 'volume'})
+        for col in ['open','high','low','close','volume']:
+            df[col] = df[col].astype(float)
+
+        # RSI
+        delta = df['close'].diff()
+        gain = delta.clip(lower=0).rolling(14).mean()
+        loss = (-delta.clip(upper=0)).rolling(14).mean()
+        df['rsi14'] = 100 - (100 / (1 + gain / loss.replace(0, 1e-10)))
+        g7 = delta.clip(lower=0).rolling(7).mean()
+        l7 = (-delta.clip(upper=0)).rolling(7).mean()
+        df['rsi7'] = 100 - (100 / (1 + g7 / l7.replace(0, 1e-10)))
+
+        # MACD
+        ema12 = df['close'].ewm(span=12).mean()
+        ema26 = df['close'].ewm(span=26).mean()
+        df['macd'] = ema12 - ema26
+        df['macd_signal'] = df['macd'].ewm(span=9).mean()
+        df['macd_hist'] = df['macd'] - df['macd_signal']
+
+        # Bollinger
+        sma20 = df['close'].rolling(20).mean()
+        std20 = df['close'].rolling(20).std()
+        df['bb_pctb'] = (df['close'] - (sma20 - 2*std20)) / (4*std20 + 1e-10)
+        df['bb_bandwidth'] = (4*std20) / (sma20 + 1e-10)
+
+        # Williams %R
+        h14 = df['high'].rolling(14).max()
+        l14 = df['low'].rolling(14).min()
+        df['williams_r'] = (h14 - df['close']) / (h14 - l14 + 1e-10) * -100
+
+        # ATR
+        tr = pd.concat([df['high']-df['low'],
+                        (df['high']-df['close'].shift()).abs(),
+                        (df['low']-df['close'].shift()).abs()], axis=1).max(axis=1)
+        df['atr14_norm'] = tr.rolling(14).mean() / df['close']
+
+        # EMAs
+        df['ema5']  = df['close'].ewm(span=5).mean()
+        df['ema20'] = df['close'].ewm(span=20).mean()
+        df['ema50'] = df['close'].ewm(span=50).mean()
+        df['ema5_20_cross']  = df['ema5']  - df['ema20']
+        df['ema20_50_cross'] = df['ema20'] - df['ema50']
+        df['price_vs_ema50'] = (df['close'] - df['ema50']) / df['ema50']
+
+        # Momentum
+        for n in [1,3,5,10]:
+            df[f'mom{n}'] = (df['close'] - df['close'].shift(n)) / df['close'].shift(n)
+
+        # OBV
+        obv = (np.sign(df['close'].diff()) * df['volume']).fillna(0).cumsum()
+        df['obv_zscore'] = (obv - obv.rolling(50).mean()) / (obv.rolling(50).std() + 1e-10)
+        df['vol_ratio'] = df['volume'] / df['volume'].rolling(20).mean()
+
+        # Heikin Ashi
+        ha_close = (df['open']+df['high']+df['low']+df['close'])/4
+        ha_open  = (df['open'].shift()+df['close'].shift())/2
+        df['ha_trend'] = (ha_close > ha_open).astype(int)
+        df['ha_body']  = (ha_close - ha_open) / df['close']
+
+        # VWAP
+        df['vwap20']   = (df['close']*df['volume']).rolling(20).sum() / df['volume'].rolling(20).sum()
+        df['vwap_dev'] = (df['close'] - df['vwap20']) / df['vwap20']
+
+        # ADX
+        plus_dm  = df['high'].diff().clip(lower=0)
+        minus_dm = (-df['low'].diff()).clip(lower=0)
+        df['adx'] = (plus_dm.rolling(14).mean()/tr.rolling(14).mean() -
+                     minus_dm.rolling(14).mean()/tr.rolling(14).mean()).abs().rolling(14).mean()*100
+        df['vol_regime'] = df['close'].pct_change().rolling(20).std()
+
+        df = df.dropna()
+        if df.empty:
+            return {'prob_up': 0.5, 'prob_down': 0.5, 'adx': 0, 'vol_ratio': 1.0, 'skip': True}
+
+        row = df.iloc[-1]
+        adx_val = float(row['adx'])
+        vol_ratio_val = float(row['vol_ratio'])
+
+        # GATE 1: ADX must be >= 20 (trending market)
+        if adx_val < 20:
+            logging.info('[lgbm] SKIP — ADX=%.1f < 20 (ranging)', adx_val)
+            return {'prob_up': 0.5, 'prob_down': 0.5, 'adx': adx_val, 'vol_ratio': vol_ratio_val, 'skip': True}
+
+        # GATE 2: Volume ratio must be >= 1.1
+        if vol_ratio_val < 1.1:
+            logging.info('[lgbm] SKIP — vol_ratio=%.2f < 1.1', vol_ratio_val)
+            return {'prob_up': 0.5, 'prob_down': 0.5, 'adx': adx_val, 'vol_ratio': vol_ratio_val, 'skip': True}
+
+        X = row[self.FEATURES].values.reshape(1, -1)
+        prob_up = float(self.model.predict_proba(X)[0][1])
+        prob_down = 1.0 - prob_up
+
+        logging.info('[lgbm] prob_up=%.3f adx=%.1f vol_ratio=%.2f', prob_up, adx_val, vol_ratio_val)
+        return {'prob_up': prob_up, 'prob_down': prob_down, 'adx': adx_val, 'vol_ratio': vol_ratio_val, 'skip': False}
+
 
 # ============================================================
 # ADAPTIVE CONFIDENCE SYSTEM (kept for reference, no longer used for threshold)
@@ -354,8 +486,35 @@ def engineer_features(df, regime_detector=None, trade_memory=None, training_mode
     
     d['ema_5_20'] = c.ewm(span=5).mean() / c.ewm(span=20).mean() - 1
     d['ema_10_50'] = c.ewm(span=10).mean() / c.ewm(span=50).mean() - 1
-    d['price_vs_vwap'] = c / (c.rolling(20).mean()) - 1
-    
+
+    # True VWAP deviation (volume-weighted, not simple MA)
+    vwap_num = (c * v).rolling(20).sum()
+    vwap_den = v.rolling(20).sum().replace(0, np.nan)
+    vwap_20 = vwap_num / vwap_den
+    d['price_vs_vwap'] = (c - vwap_20) / vwap_20.replace(0, np.nan)
+
+    # Heikin Ashi
+    ha_close = (o + h + l + c) / 4
+    ha_open = pd.Series(np.nan, index=d.index)
+    ha_open.iloc[0] = (o.iloc[0] + c.iloc[0]) / 2
+    for i in range(1, len(d)):
+        ha_open.iloc[i] = (ha_open.iloc[i-1] + ha_close.iloc[i-1]) / 2
+    ha_high = pd.concat([h, ha_open, ha_close], axis=1).max(axis=1)
+    ha_low  = pd.concat([l, ha_open, ha_close], axis=1).min(axis=1)
+    ha_range = (ha_high - ha_low).replace(0, np.nan)
+    d['ha_body']       = (ha_close - ha_open) / ha_open.replace(0, np.nan)
+    d['ha_upper_wick'] = (ha_high - pd.concat([ha_open, ha_close], axis=1).max(axis=1)) / ha_range
+    d['ha_lower_wick'] = (pd.concat([ha_open, ha_close], axis=1).min(axis=1) - ha_low) / ha_range
+    ha_green = (ha_close > ha_open).astype(int)
+    ha_groups = (ha_green != ha_green.shift()).cumsum()
+    ha_consec = ha_green.groupby(ha_groups).cumcount() + 1
+    d['ha_consec'] = ha_consec * np.where(ha_green, 1, -1)  # + = bullish streak, - = bearish
+
+    # Williams %R (14-period)
+    hi14 = h.rolling(14).max()
+    lo14 = l.rolling(14).min()
+    d['williams_r'] = -100 * (hi14 - c) / (hi14 - lo14).replace(0, np.nan)
+
     d['hour'] = d['time'].dt.hour
     d['hour_sin'] = np.sin(2 * np.pi * d['hour'] / 24)
     d['hour_cos'] = np.cos(2 * np.pi * d['hour'] / 24)
@@ -426,10 +585,15 @@ FEATURE_COLS = [
     'dist_from_ma20','dist_from_ma50',
     'ret_lag_1','ret_lag_2','ret_lag_3',
     'vol_lag_1','vol_lag_2','vol_lag_3',
-    # New features
+    # Regime features
     'regime_trending','regime_ranging','regime_volatile','regime_confidence',
+    # Trade memory features
     'mem_recent_wr_10','mem_recent_wr_30','mem_avg_confidence',
     'mem_up_bias','mem_streak','mem_time_of_day_wr',
+    # v5: Heikin Ashi
+    'ha_body','ha_upper_wick','ha_lower_wick','ha_consec',
+    # v5: Williams %R
+    'williams_r',
 ]
 
 
@@ -592,6 +756,7 @@ def main():
     adaptive_conf = AdaptiveConfidence(base=0.55, min_thresh=0.52, max_thresh=0.70)
     regime_detector = RegimeDetector()
     trade_memory = TradeMemory()
+    lgbm_predictor = LGBMPredictor()
     
     # Load trade history into memory
     trade_memory.load_from_log()
@@ -669,10 +834,19 @@ def main():
                 # Detect regime
                 regime, regime_conf = regime_detector.detect(df)
                 
-                # Predict with regime + memory features
-                prob_up, price = predict(models[coin], df, regime_detector, trade_memory)
-                if prob_up is None:
+                # Predict with LightGBM (v6: replaces XGBoost + feature pipeline)
+                candles_list = (
+                    df[['time','open','high','low','close','volume']]
+                    .rename(columns={'time': 'ts', 'volume': 'vol'})
+                    .to_dict('records')
+                )
+                lgbm_result = lgbm_predictor.predict(candles_list)
+                if lgbm_result['skip']:
+                    stats[coin]['skips'] += 1
+                    print(f"  [{coin}] {latest_time} | SKIP (lgbm gate: adx={lgbm_result['adx']:.1f} vol_ratio={lgbm_result['vol_ratio']:.2f})", flush=True)
                     continue
+                prob_up = lgbm_result['prob_up']
+                price = float(df['close'].iloc[-1])
                 
                 confidence = max(prob_up, 1 - prob_up)
                 direction = 'UP' if prob_up > 0.5 else 'DOWN'
